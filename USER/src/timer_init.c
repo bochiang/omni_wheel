@@ -8,7 +8,7 @@ void TIM6_Configuration(void)
     TIM_DeInit(TIM6);
     TIM_TimeBaseStructure.TIM_Period=1000;		 								/* 自动重装载寄存器周期的值(计数值) */
     /* 累计 TIM_Period个频率后产生一个更新或者中断 */
-    TIM_TimeBaseStructure.TIM_Prescaler= (72 - 1);				    /* 时钟预分频数 72M/72 */
+    TIM_TimeBaseStructure.TIM_Prescaler= (720 - 1);				    /* 时钟预分频数 72M/72 */
     TIM_TimeBaseStructure.TIM_ClockDivision=TIM_CKD_DIV1; 		/* 采样分频 */
     TIM_TimeBaseStructure.TIM_CounterMode=TIM_CounterMode_Up; /* 向上计数模式 */
     TIM_TimeBaseInit(TIM6, &TIM_TimeBaseStructure);
@@ -72,7 +72,7 @@ static void TIM3_Mode_Config(void)
 
   /* Time base configuration */		 
   TIM_TimeBaseStructure.TIM_Period = 999;                      //当定时器从0计数到999，即为1000次，为一个定时周期
-  TIM_TimeBaseStructure.TIM_Prescaler = 1;	               //设置预分频：2预分频，即为18MHz
+  TIM_TimeBaseStructure.TIM_Prescaler = 3;	               //设置预分频：4预分频，即为18MHz
   TIM_TimeBaseStructure.TIM_ClockDivision = 0;	               //设置时钟分频系数：不分频
   TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;  //向上计数模式
 
@@ -138,4 +138,71 @@ void TIM3_PWM_Init(void)
 {
 	TIM3_GPIO_Config();
 	TIM3_Mode_Config();	
+}
+
+void TIM_Counter_Init(void)
+{
+	TIM_TimeBaseInitTypeDef TIM_TimeBaseInitStructure;
+	GPIO_InitTypeDef  GPIO_InitStructuer;
+
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_TIM1,ENABLE); ///使能TIM1时钟
+	RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM2,ENABLE); ///使能TIM2时钟
+	RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM4,ENABLE); ///使能TIM4时钟
+	
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA | RCC_APB2Periph_GPIOE,ENABLE);
+	GPIO_InitStructuer.GPIO_Pin=GPIO_Pin_0|GPIO_Pin_12;
+	GPIO_InitStructuer.GPIO_Mode=GPIO_Mode_IN_FLOATING;
+	GPIO_InitStructuer.GPIO_Speed=GPIO_Speed_50MHz;
+	GPIO_Init(GPIOA,&GPIO_InitStructuer);
+	
+	GPIO_InitStructuer.GPIO_Pin =  GPIO_Pin_0;
+  GPIO_Init(GPIOE, &GPIO_InitStructuer);
+
+	TIM_TimeBaseInitStructure.TIM_Period = 0xFFFF;//自动重装载值
+	TIM_TimeBaseInitStructure.TIM_Prescaler=0; //定时器分频
+	TIM_TimeBaseInitStructure.TIM_CounterMode=TIM_CounterMode_Up;//向上计数模式
+	TIM_TimeBaseInitStructure.TIM_ClockDivision=TIM_CKD_DIV1; 
+	TIM_TimeBaseInit(TIM1,&TIM_TimeBaseInitStructure);//初始化TIM1
+	TIM_ETRClockMode2Config(TIM1, TIM_ExtTRGPSC_OFF,TIM_ExtTRGPolarity_NonInverted, 5);//5次采样滤波  外部时钟模式2
+	TIM_ITConfig(TIM1,TIM_IT_Update,ENABLE);
+	TIM_SetCounter(TIM1,0);//设置计数初值
+	TIM_Cmd(TIM1,ENABLE); //使能定时器1
+	
+	TIM_TimeBaseInitStructure.TIM_Period = 0xFFFF;//自动重装载值
+	TIM_TimeBaseInitStructure.TIM_Prescaler=0; //定时器分频
+	TIM_TimeBaseInitStructure.TIM_CounterMode=TIM_CounterMode_Up;//向上计数模式
+	TIM_TimeBaseInitStructure.TIM_ClockDivision=TIM_CKD_DIV1; 
+	TIM_TimeBaseInit(TIM2,&TIM_TimeBaseInitStructure);//初始化TIM1
+	TIM_ETRClockMode2Config(TIM2, TIM_ExtTRGPSC_OFF,TIM_ExtTRGPolarity_NonInverted, 5);//5次采样滤波  外部时钟模式2
+	TIM_ITConfig(TIM2,TIM_IT_Update,ENABLE);
+	TIM_SetCounter(TIM2,0);//设置计数初值
+	TIM_Cmd(TIM2,ENABLE); //使能定时器2
+	
+	TIM_TimeBaseInitStructure.TIM_Period = 0xFFFF;//自动重装载值
+	TIM_TimeBaseInitStructure.TIM_Prescaler=0; //定时器分频
+	TIM_TimeBaseInitStructure.TIM_CounterMode=TIM_CounterMode_Up;//向上计数模式
+	TIM_TimeBaseInitStructure.TIM_ClockDivision=TIM_CKD_DIV1; 
+	TIM_TimeBaseInit(TIM4,&TIM_TimeBaseInitStructure);//初始化TIM1
+	TIM_ETRClockMode2Config(TIM4, TIM_ExtTRGPSC_OFF,TIM_ExtTRGPolarity_NonInverted, 5);//5次采样滤波  外部时钟模式2
+	TIM_ITConfig(TIM4,TIM_IT_Update,ENABLE);
+	TIM_SetCounter(TIM4,0);//设置计数初值
+	TIM_Cmd(TIM4,ENABLE); //使能定时器4
+}
+
+void Count_get(int *count1, int *count2, int *count3)
+{
+	TIM_Cmd(TIM1,DISABLE); 	
+	*count1	= TIM_GetCounter(TIM1);
+	TIM_SetCounter(TIM1, 0);
+	TIM_Cmd(TIM1,ENABLE);
+	
+	TIM_Cmd(TIM2,DISABLE); 
+	*count2	= TIM_GetCounter(TIM2);
+	TIM_SetCounter(TIM2, 0);
+	TIM_Cmd(TIM2,ENABLE);
+	
+	TIM_Cmd(TIM3,DISABLE);
+	*count3	= TIM_GetCounter(TIM4);
+	TIM_SetCounter(TIM4, 0); 
+	TIM_Cmd(TIM3,ENABLE);
 }

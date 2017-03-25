@@ -416,6 +416,21 @@
               <FileType>1</FileType>
               <FilePath>.\src\timer_init.c</FilePath>
             </File>
+            <File>
+              <FileName>usart1.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\src\usart1.c</FilePath>
+            </File>
+            <File>
+              <FileName>nvic.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\src\nvic.c</FilePath>
+            </File>
+            <File>
+              <FileName>include.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\inc\include.h</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>

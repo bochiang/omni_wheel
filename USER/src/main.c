@@ -1,9 +1,9 @@
-#include "stm32f10x.h"
-#include "timer_init.h"
-#include "nvic.h"
+#include"include.h"
 
-volatile u32 time; // ms 计时变量
-
+int time_flag=0; // ms 计时变量
+int count1=0;
+int count2=0;
+int count3=0;
 /*
  * 函数名：main
  * 描述  ：主函数
@@ -25,11 +25,15 @@ int main(void)
   PWM2_duty(250);
   PWM3_duty(125);
 	
+	TIM_Counter_Init();
+	USART1_Config();
   while(1)
   {
-    if ( time == 1000 ) /* 1s 时间到 */
+    if ( time_flag == 1 ) /* 10ms 时间到 */
     {
-      time = 0;
-    }        
+      time_flag = 0;
+			USART1_printf( USART1, "count1=%d; count2=%d; count3=%d;\r\n", count1, count2, count3);
+    }  
+			
   }
 }

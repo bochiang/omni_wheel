@@ -12,4 +12,8 @@ void PWM1_duty(int duty);
 void PWM2_duty(int duty);
 void PWM3_duty(int duty);
 
+void TIM_Counter_Init(void);
+void Count_get(int *count1, int *count2, int *count3);
+
+
 #endif	/* TIME_TEST_H */

@@ -23,7 +23,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f10x_it.h"
 #include "usart1.h"
-extern volatile u32 time;
+#include"include.h"
 
 /** @addtogroup Template_Project
   * @{
@@ -154,7 +154,8 @@ void TIM6_IRQHandler(void)
 	if ( TIM_GetITStatus(TIM6 , TIM_IT_Update) != RESET ) 
 	{	
 		TIM_ClearITPendingBit(TIM6 , TIM_FLAG_Update);    
-  		 time++;
+		time_flag = 1;
+		Count_get(&count1, &count2, &count3);	
 	}		 	
 }
 
