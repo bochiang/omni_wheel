@@ -2,7 +2,7 @@
 #define _INCLUDE_H_
 
 #include "stm32f10x.h"
-#include "timer_init.h"
+#include "system_init.h"
 #include "nvic.h"
 #include "usart1.h"
 

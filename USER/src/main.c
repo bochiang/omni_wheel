@@ -21,12 +21,14 @@ int main(void)
   TIM6_Configuration();
 	
 	TIM3_PWM_Init();
-	PWM1_duty(500);
-  PWM2_duty(250);
-  PWM3_duty(125);
+	Gpio_init();
+	PWM1_duty(-500);
+  PWM2_duty(-500);
+  PWM3_duty(-500);
 	
 	TIM_Counter_Init();
 	USART1_Config();
+	
   while(1)
   {
     if ( time_flag == 1 ) /* 10ms ʱ�䵽 */

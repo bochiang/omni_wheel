@@ -1,4 +1,4 @@
-#include "timer_init.h"
+#include "system_init.h"
 
 /*TIM_Period--1000   TIM_Prescaler--71 -->中断周期为1ms*/
 void TIM6_Configuration(void)
@@ -110,22 +110,6 @@ static void TIM3_Mode_Config(void)
   TIM_Cmd(TIM3, ENABLE);                                       //使能定时器3	
 }
 
-
-void PWM1_duty(int duty)
-{
-  TIM3->CCR1 = duty;
-}
-
-void PWM2_duty(int duty)
-{
-  TIM3->CCR2 = duty;
-}
-
-void PWM3_duty(int duty)
-{
-  TIM3->CCR3 = duty;
-}
-
 /*
  * 函数名：TIM3_Mode_Config
  * 描述  ：TIM3 输出PWM信号初始化，只要调用这个函数
@@ -192,17 +176,116 @@ void TIM_Counter_Init(void)
 void Count_get(int *count1, int *count2, int *count3)
 {
 	TIM_Cmd(TIM1,DISABLE); 	
-	*count1	= TIM_GetCounter(TIM1);
+	if(GPIO_ReadInputDataBit(GPIOA,GPIO_Pin_1) == 1)
+	{
+		*count1	= TIM_GetCounter(TIM1);
+	}
+	else
+	{
+		*count1	= -TIM_GetCounter(TIM1);
+	}
 	TIM_SetCounter(TIM1, 0);
 	TIM_Cmd(TIM1,ENABLE);
 	
 	TIM_Cmd(TIM2,DISABLE); 
-	*count2	= TIM_GetCounter(TIM2);
+	if(GPIO_ReadInputDataBit(GPIOC,GPIO_Pin_10) == 1)
+	{
+		*count2	= TIM_GetCounter(TIM2);
+	}
+	else
+	{
+		*count2	= -TIM_GetCounter(TIM2);
+	}
 	TIM_SetCounter(TIM2, 0);
 	TIM_Cmd(TIM2,ENABLE);
 	
 	TIM_Cmd(TIM3,DISABLE);
-	*count3	= TIM_GetCounter(TIM4);
+	if(GPIO_ReadInputDataBit(GPIOE,GPIO_Pin_1) == 1)
+	{
+		*count3	= TIM_GetCounter(TIM4);
+	}
+	else
+	{
+		*count3	= -TIM_GetCounter(TIM4);
+	}
 	TIM_SetCounter(TIM4, 0); 
 	TIM_Cmd(TIM3,ENABLE);
+}
+
+void Gpio_init(void)
+{
+	GPIO_InitTypeDef GPIO_InitStructure;
+	RCC_APB2PeriphClockCmd( RCC_APB2Periph_GPIOA | RCC_APB2Periph_GPIOB | RCC_APB2Periph_GPIOC | RCC_APB2Periph_GPIOE, ENABLE);
+
+  GPIO_InitStructure.GPIO_Pin = GPIO_Pin_4;	    //PWM3
+  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;       
+  GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+  GPIO_Init(GPIOA, &GPIO_InitStructure);
+
+	GPIO_InitStructure.GPIO_Pin =  GPIO_Pin_2;  //PWM1
+  GPIO_Init(GPIOB, &GPIO_InitStructure);
+	
+	GPIO_InitStructure.GPIO_Pin =  GPIO_Pin_4; //PWM2
+  GPIO_Init(GPIOC, &GPIO_InitStructure);
+	
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_1;     //Encoder1
+	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz; 
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPU; 
+	GPIO_Init(GPIOA, &GPIO_InitStructure);
+	
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_10;     //Encoder2
+	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz; 
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPU; 
+	GPIO_Init(GPIOC, &GPIO_InitStructure);
+	
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_1;     //Encoder3
+	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz; 
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPU; 
+	GPIO_Init(GPIOE, &GPIO_InitStructure);
+}
+
+
+void PWM3_duty(int duty)
+{
+	if(duty>0)
+	{
+		GPIO_SetBits(GPIOA, GPIO_Pin_4);
+		TIM3->CCR1 = duty;
+	}
+	else
+	{
+		GPIO_ResetBits(GPIOA, GPIO_Pin_4);
+		duty = -duty;
+		TIM3->CCR1 = duty;
+	}
+}
+
+void PWM2_duty(int duty)
+{
+  if(duty>0)
+	{
+		GPIO_SetBits(GPIOC, GPIO_Pin_4);
+		TIM3->CCR2 = duty;
+	}
+	else
+	{
+		GPIO_ResetBits(GPIOC, GPIO_Pin_4);
+		duty = -duty;
+		TIM3->CCR2 = duty;
+	}
+}
+
+void PWM1_duty(int duty)
+{
+  if(duty>0)
+	{
+		GPIO_SetBits(GPIOB, GPIO_Pin_2);
+		TIM3->CCR3 = duty;
+	}
+	else
+	{
+		GPIO_ResetBits(GPIOB, GPIO_Pin_2);
+		duty = -duty;
+		TIM3->CCR3 = duty;
+	}
 }
